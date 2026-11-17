@@ -1,9 +1,13 @@
 import { useEffect, useState } from 'react'
 import './App.css'
 
-const API_URL = '/api/todos'
+const API_URL = import.meta.env.VITE_API_URL?.trim().replace(/\/+$/, '')
 
 async function requestTodos(path = '', options = {}) {
+  if (!API_URL) {
+    throw new Error('백엔드 주소가 설정되지 않았습니다. Vercel 환경변수 VITE_API_URL을 설정해 주세요.')
+  }
+
   const response = await fetch(`${API_URL}${path}`, {
     ...options,
     headers: {
@@ -11,10 +15,15 @@ async function requestTodos(path = '', options = {}) {
       ...options.headers,
     },
   })
-  const data = response.status === 204 ? null : await response.json()
+  const isJson = response.headers.get('content-type')?.includes('application/json')
+  const data = response.status === 204 ? null : isJson ? await response.json() : null
 
   if (!response.ok) {
-    throw new Error(data?.error || '요청을 처리하지 못했습니다.')
+    throw new Error(data?.error || `백엔드 요청이 실패했습니다 (${response.status}). 주소와 CORS 설정을 확인해 주세요.`)
+  }
+
+  if (response.status !== 204 && data === null) {
+    throw new Error('백엔드가 JSON이 아닌 응답을 반환했습니다. Vercel의 VITE_API_URL 설정을 확인해 주세요.')
   }
 
   return data
@@ -22,7 +31,7 @@ async function requestTodos(path = '', options = {}) {
 
 function getErrorMessage(error) {
   if (error instanceof TypeError) {
-    return '백엔드에 연결할 수 없습니다. localhost:5000 서버가 실행 중인지 확인해 주세요.'
+    return '백엔드에 연결할 수 없습니다. 주소와 백엔드의 CORS 설정을 확인해 주세요.'
   }
 
   return error.message || '요청을 처리하지 못했습니다.'
