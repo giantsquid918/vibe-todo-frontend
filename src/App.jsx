@@ -1,13 +1,9 @@
 import { useEffect, useState } from 'react'
 import './App.css'
 
-const API_URL = import.meta.env.VITE_API_URL?.trim().replace(/\/+$/, '')
+const API_URL = '/api/todos'
 
 async function requestTodos(path = '', options = {}) {
-  if (!API_URL) {
-    throw new Error('백엔드 주소가 설정되지 않았습니다. Vercel 환경변수 VITE_API_URL을 설정해 주세요.')
-  }
-
   const response = await fetch(`${API_URL}${path}`, {
     ...options,
     headers: {
@@ -31,7 +27,7 @@ async function requestTodos(path = '', options = {}) {
 
 function getErrorMessage(error) {
   if (error instanceof TypeError) {
-    return '백엔드에 연결할 수 없습니다. 주소와 백엔드의 CORS 설정을 확인해 주세요.'
+    return 'API 서버에 연결할 수 없습니다. 배포 상태와 백엔드 주소 설정을 확인해 주세요.'
   }
 
   return error.message || '요청을 처리하지 못했습니다.'
