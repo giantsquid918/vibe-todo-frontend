@@ -1,13 +1,9 @@
 import { useEffect, useState } from 'react'
 import './App.css'
 
-const API_URL = import.meta.env.VITE_API_URL?.trim().replace(/\/+$/, '')
+const API_URL = '/api/todos'
 
 async function requestTodos(path = '', options = {}) {
-  if (!API_URL) {
-    throw new Error('VITE_API_URL 환경변수를 설정해 주세요.')
-  }
-
   const response = await fetch(`${API_URL}${path}`, {
     ...options,
     headers: {
@@ -26,7 +22,7 @@ async function requestTodos(path = '', options = {}) {
 
 function getErrorMessage(error) {
   if (error instanceof TypeError) {
-    return '백엔드에 연결할 수 없습니다. 네트워크 연결과 배포 서버 상태를 확인해 주세요.'
+    return '백엔드에 연결할 수 없습니다. localhost:5000 서버가 실행 중인지 확인해 주세요.'
   }
 
   return error.message || '요청을 처리하지 못했습니다.'
